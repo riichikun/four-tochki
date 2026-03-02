@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2026.  Baks.dev <admin@baks.dev>
+ * Copyright 2026.  Baks.dev <admin@baks.dev>
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -23,52 +23,21 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\FourTochki\Type\Authorization;
+namespace BaksDev\FourTochki\Api\GetFindTyre;
 
-use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
+use BaksDev\Reference\Money\Type\Money;
 
-final readonly class FourTochkiAuthorization
+final readonly class FourTochkiGetFindTyreResult
 {
-    private UserProfileUid $profile;
+    public function __construct(private int $quantity, private string $price) {}
 
-    public function __construct(
-        UserProfileUid|string $profile,
-        private string $login,
-        private string $password,
-        private int $warehouse,
-        private string $percent,
-    )
+    public function getQuantity(): int
     {
-        if(is_string($profile))
-        {
-            $profile = new UserProfileUid($profile);
-        }
-
-        $this->profile = $profile;
+        return $this->quantity;
     }
 
-    public function getProfile(): UserProfileUid
+    public function getPrice(): Money
     {
-        return $this->profile;
-    }
-
-    public function getLogin(): string
-    {
-        return $this->login;
-    }
-
-    public function getPassword(): string
-    {
-        return $this->password;
-    }
-
-    public function getWarehouse(): int
-    {
-        return $this->warehouse;
-    }
-
-    public function getPercent(): string
-    {
-        return $this->percent;
+        return new Money($this->price);
     }
 }
