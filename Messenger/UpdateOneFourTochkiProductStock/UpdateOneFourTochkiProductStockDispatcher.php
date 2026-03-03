@@ -30,7 +30,6 @@ use BaksDev\FourTochki\Api\GetFindTyre\FourTochkiGetFindTyreRequest;
 use BaksDev\FourTochki\Api\GetFindTyre\FourTochkiGetFindTyreResult;
 use BaksDev\FourTochki\Products\Repository\FourTochkiProductProfile\FourTochkiProductProfileInterface;
 use BaksDev\FourTochki\Products\UseCase\NewEdit\FourTochkiProductDTO;
-use BaksDev\FourTochki\Repository\FourTochkiAuthorizationByProfile\FourTochkiAuthorizationByProfileInterface;
 use BaksDev\Products\Product\Messenger\Price\UpdateProductPriceMessage;
 use BaksDev\Products\Product\Repository\CurrentProductEvent\CurrentProductEventInterface;
 use BaksDev\Products\Stocks\Entity\Total\ProductStockTotal;
@@ -48,7 +47,6 @@ final readonly class UpdateOneFourTochkiProductStockDispatcher
     public function __construct(
         #[Target('fourTochkiLogger')] private LoggerInterface $Logger,
         private FourTochkiGetFindTyreRequest $FourTochkiGetFindTyreRequest,
-        private FourTochkiAuthorizationByProfileInterface $FourTochkiAuthorizationByProfileRepository,
         private ProductStockTotalEditHandler $ProductStockTotalEditHandler,
         private ProductStocksTotalStorageInterface $ProductStocksTotalStorageRepository,
         private EntityManagerInterface $EntityManager,
@@ -63,19 +61,6 @@ final readonly class UpdateOneFourTochkiProductStockDispatcher
      */
     public function __invoke(UpdateOneFourTochkiProductStockMessage $message): void
     {
-        /** Получаем данные для авторизации */
-        $authorization = $this->FourTochkiAuthorizationByProfileRepository->getAuthorization($message->getProfile());
-
-        if(false === $authorization)
-        {
-            $this->Logger->warning(
-                'Данные для авторизации данного профиля не были найдены',
-                [var_export($message, true), self::class.':'.__LINE__]
-            );
-            return;
-        }
-
-
         /** Находим настройки продукта для 4tochki */
         $fourTochkiProduct = $this->FourTochkiProductProfileRepository
             ->product($message->getProduct())
@@ -102,7 +87,7 @@ final readonly class UpdateOneFourTochkiProductStockDispatcher
             ->getValue();
 
         $fourTochkiGetFindTyreResult = $this->FourTochkiGetFindTyreRequest
-            ->authorization($authorization)
+            ->profile($message->getProfile())
             ->findTyre($code);
 
         if(false === ($fourTochkiGetFindTyreResult instanceof FourTochkiGetFindTyreResult))
@@ -156,7 +141,6 @@ final readonly class UpdateOneFourTochkiProductStockDispatcher
                 );
             }
 
-
             $productStocksTotal->getDto($productStockTotalEditDTO);
 
             $productStockTotalEditDTO
@@ -195,7 +179,7 @@ final readonly class UpdateOneFourTochkiProductStockDispatcher
 
 
             /** Получаем цену с учетом торговой наценки */
-            $price = $fourTochkiGetFindTyreResult->getPrice()->applyString($authorization->getPercent());
+            $price = $fourTochkiGetFindTyreResult->getPriceWithPercent();
 
             $updateProductPriceMessage
                 ->setEvent($productEvent->getId())

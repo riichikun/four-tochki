@@ -36,7 +36,7 @@ final readonly class FourTochkiAuthorization
         private string $login,
         private string $password,
         private int $warehouse,
-        private string $percent,
+        private ?string $percent,
     )
     {
         if(is_string($profile))
@@ -67,8 +67,8 @@ final readonly class FourTochkiAuthorization
         return $this->warehouse;
     }
 
-    public function getPercent(): string
+    public function getPercent(): string|false
     {
-        return $this->percent;
+        return false === empty($this->percent) ? $this->percent : false;
     }
 }

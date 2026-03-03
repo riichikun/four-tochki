@@ -29,14 +29,24 @@ use BaksDev\Reference\Money\Type\Money;
 
 final readonly class FourTochkiGetFindTyreResult
 {
-    public function __construct(private int $quantity, private string $price) {}
+    public function __construct(private int $quantity, private string $price, private string|false $percent) {}
 
     public function getQuantity(): int
     {
         return $this->quantity;
     }
 
-    public function getPrice(): Money
+    public function getPriceWithPercent(): Money
+    {
+        if(false === $this->percent)
+        {
+            return new Money($this->price);
+        }
+
+        return new Money($this->price)->applyString($this->percent);
+    }
+
+    public function getPriceWithoutPercent(): Money
     {
         return new Money($this->price);
     }

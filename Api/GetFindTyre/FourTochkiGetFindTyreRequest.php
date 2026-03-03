@@ -53,7 +53,11 @@ final class FourTochkiGetFindTyreRequest extends FourTochkiApi
             ],
         );
 
-        if(true === empty($response) || false === isset($response->GetFindTyreResult->price_rest_list->TyrePriceRest))
+        if(
+            true === empty($response) ||
+            true === is_array($response) ||
+            false === isset($response->GetFindTyreResult->price_rest_list->TyrePriceRest)
+        )
         {
             return false;
         }
@@ -61,6 +65,6 @@ final class FourTochkiGetFindTyreRequest extends FourTochkiApi
         $quantity = $response->GetFindTyreResult->price_rest_list->TyrePriceRest->whpr->wh_price_rest->rest;
         $price = $response->GetFindTyreResult->price_rest_list->TyrePriceRest->whpr->wh_price_rest->price;
 
-        return new FourTochkiGetFindTyreResult($quantity, $price);
+        return new FourTochkiGetFindTyreResult($quantity, $price, $this->getPercent());
     }
 }
