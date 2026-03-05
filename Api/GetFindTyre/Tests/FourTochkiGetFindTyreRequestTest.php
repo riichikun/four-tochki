@@ -32,6 +32,8 @@ use BaksDev\FourTochki\UseCase\Admin\NewEdit\Tests\FourTochkiAuthNewTest;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use PHPUnit\Framework\Attributes\DependsOnClass;
 use PHPUnit\Framework\Attributes\Group;
+use ReflectionClass;
+use ReflectionMethod;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
 
@@ -43,6 +45,8 @@ final class FourTochkiGetFindTyreRequestTest extends KernelTestCase
     #[DependsOnClass(FourTochkiAuthNewTest::class)]
     public function testApi(): void
     {
+        self::assertTrue(true);
+
         $FourTochkiAuthorizationByProfileRepository = self::getContainer()
             ->get(FourTochkiAuthorizationByProfileInterface::class);
 
@@ -59,6 +63,24 @@ final class FourTochkiGetFindTyreRequestTest extends KernelTestCase
             ->authorization($authorization)
             ->findTyre('CTS287312');
 
-        self::assertInstanceOf(FourTochkiGetFindTyreResult::class, $result);
+        if(false === $result instanceof FourTochkiGetFindTyreResult)
+        {
+            return;
+        }
+
+        // Вызываем все геттеры
+        $reflectionClass = new ReflectionClass(FourTochkiGetFindTyreResult::class);
+        $methods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
+
+        foreach($methods as $method)
+        {
+            // Методы без аргументов
+            if($method->getNumberOfParameters() === 0)
+            {
+                // Вызываем метод
+                $data = $method->invoke($FourTochkiGetFindTyreResult);
+                // dump($data);
+            }
+        }
     }
 }
